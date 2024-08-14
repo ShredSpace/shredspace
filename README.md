@@ -19,7 +19,7 @@ ShredSpace is a game store and updator for Windows.
 ### Remove a Game
 Coming Soon!
 
-## Update a Game
+### Update a Game
 1. Open the updator.exe file.
 2. Select the second option in the menu and select your new game to update it.
 3. Exit out of updator.exe and open shredspsace.exe. Your new game is now fully updated!
