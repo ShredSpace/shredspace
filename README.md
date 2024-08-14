@@ -1,6 +1,9 @@
 # ShredSpace
 
-ShredSpace is a game store and updator for Windows.
+ShredSpace is a game store and updator for Windows. Designed for compatibility and HTML5 games that require space efficiency, ShredSpace is the perfect store for your new game!
+
+## Launch Game
+The game Appel Collection comes with ShredSpace. Appel Collection is a collection of Appel games you can play in your browser.
 
 ## Getting Started
 1. Download the latest release of ShredSpace from the "releases" tab.
@@ -26,4 +29,8 @@ Coming Soon!
 
 ## Notes
 You cannot run a game until you download it, although the game will show up in your menu.
+
+## Gamedev Info
+### Submitting your Game
+Coming Soon!
 
