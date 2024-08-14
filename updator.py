@@ -6,6 +6,8 @@ from flask import Flask, render_template
 
 app = Flask(__name__)
 
+game_data = {}
+
 # Function to download and unzip files
 def download_and_unzip(url, save_folder='app', folder_name=None):
     if not os.path.exists(save_folder):
@@ -14,7 +16,7 @@ def download_and_unzip(url, save_folder='app', folder_name=None):
     zip_filename = url.split('/')[-1]
     zip_filepath = os.path.join(save_folder, zip_filename)
 
-    print(f"Downloading {zip_filename}...")
+    print(f"Downloading game...")
     try:
         response = requests.get(url, stream=True)
         response.raise_for_status()
@@ -40,7 +42,7 @@ def download_and_unzip(url, save_folder='app', folder_name=None):
     if not os.path.exists(extract_folder):
         os.makedirs(extract_folder)
 
-    print(f"Unzipping {zip_filename} into {extract_folder}...")
+    print(f"Installing game...")
     try:
         with zipfile.ZipFile(zip_filepath, 'r') as zip_ref:
             zip_ref.extractall(extract_folder)
@@ -48,7 +50,7 @@ def download_and_unzip(url, save_folder='app', folder_name=None):
         print(f"Error: {e} - The downloaded file is not a valid ZIP archive.")
         return
 
-    print(f"Deleting {zip_filename}...")
+    print(f"Cleaning up...")
     os.remove(zip_filepath)
 
     print(f"Download, extraction, and cleanup complete.")
@@ -93,28 +95,73 @@ def render_and_replace_static_index(game_data):
     with open(static_index_path, 'w') as f:
         f.write(rendered_content)
 
-    print(f"\nReplaced {static_index_path} with the rendered template.")
+def save_json(json_file):
+    global game_data
+    with open(json_file, "w") as jsf:
+        json.dump(game_data, jsf)
+
+def downloadGames(json_file):
+    url = input("Enter a URL for a new game (ending in .shredspace): ")
+    try:
+        game = requests.get(url)
+        game.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        print(f"Failed to download file: {e}")
+        return
+    try:
+        game_data.append(game.json())
+        save_json(json_file)
+        print("Game added to library successfully. Update game before running.")
+    except Exception as e:
+        print(f"Error: {e}")
+
+
+def updateGames():
+    global game_data
+    # Ask the user to select the games they want to update
+    selected_games = ask_user_for_selection(game_data)
+
+    if selected_games:
+        print("\nDownloading and updating selected games...\n")
+        for game in selected_games:
+            download_and_unzip(game['url'], folder_name=game['name'])
+    else:
+        print("\nNo games selected for update.")
 
 if __name__ == "__main__":
+    print("ShredSpace Updator (Text Edition) v1.0.0")
+    print()
+    print()
     # Specify the path to the JSON file
     json_file = 'games.json'
 
     # Read the game data from the JSON file
     game_data = process_json_file(json_file)
-
+    running = True
     if not game_data:
-        print("No games found in the JSON file.")
-    else:
-        # Ask the user to select the games they want to update
-        selected_games = ask_user_for_selection(game_data)
-
-        if selected_games:
-            print("\nDownloading and updating selected games...\n")
-            for game in selected_games:
-                download_and_unzip(game['url'], folder_name=game['name'])
+        print("No games found.")
+    while running:
+        print("Would you like to:")
+        print("1. Download a New Game")
+        print("2. Update Existing Games")
+        print("3. Quit")
+        selection = int(input("Select an option: ").strip())
+        if selection == 2:
+            updateGames()
+        elif selection == 1:
+            downloadGames(json_file)
+        elif selection == 3:
+            running = False
         else:
-            print("\nNo games selected for update.")
+            print("No option selected.")
 
-    # Render the template and replace the static index.html
-    with app.app_context():
-        render_and_replace_static_index(game_data)
+        # Render the template and replace the static index.html
+        with app.app_context():
+            render_and_replace_static_index(game_data)
+
+    print("Goodbye!")
+
+    save_json(json_file)
+
+
+
