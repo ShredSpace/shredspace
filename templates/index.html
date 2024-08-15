@@ -23,7 +23,7 @@
 <img src="{{ game.gameIcon }}" width="20%" />
 <p>{{ game.description }}
 <p>Rating: {{ game.rating }}+</p>
-<a class="btn btn-primary" href="{{ game.name }}/{{ game.entryPoint }}">Play Now</a>
+<a class="btn btn-primary" href="{{ game.name }}/{{ game.entryPoint }}?onShredspace=true">Play Now</a>
 </div>
 {% endfor %}
 {% else %}

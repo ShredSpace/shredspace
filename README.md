@@ -10,6 +10,7 @@ ShredSpace is a game store and updater for Windows. Designed for compatibility a
 5. Make sure to download your game - select the second option in the menu, and type in the number of your new game.
 
 ## How To
+
 ### Add a New Game
 1. Open the update.exe file.
 2. Select the first option in the menu. Paste in your game link.
@@ -25,6 +26,17 @@ ShredSpace is a game store and updater for Windows. Designed for compatibility a
 1. Open the update.exe file.
 2. Select the second option in the menu and select your new game to update it.
 3. Exit out of update.exe and open shredspsace.exe. Your new game is now fully updated!
+
+### Update ShredSpace
+#### With Git
+In the resources directory, run this command:
+
+`git pull`
+
+This command will download the latest version of ShredSpace from the GitHub repository.
+
+#### Without Git
+Open the [GitHub repository](https://github.com/ShredSpace/shredspace) and download all the files in .zip format. Extract all from the .zip file, take the contents, and copy them into the Resources folder, replacing files that already exist.
 
 ## Notes
 You cannot run a game until you download it, although the game will show up in your menu.
