@@ -6,11 +6,16 @@ import shutil
 import sys
 from flask import Flask, render_template
 
-app = Flask(__name__, template_folder=os.path.join(os.getcwd(), "templates"))
-
 game_data = {}
 
-BASE_DIR = os.getcwd()
+BASE_DIR = os.path.dirname(os.path.realpath(__file__))
+
+os.chdir(BASE_DIR)
+if "_internal" in BASE_DIR:
+    os.chdir("..")
+    BASE_DIR = os.getcwd()
+
+app = Flask(__name__, template_folder=os.path.join(BASE_DIR, "templates"))
 
 
 # Function to download and unzip files
@@ -214,7 +219,7 @@ def create_reg_file_for_pyinstaller(protocol_name, exe_path, output_file="regist
         file.write(reg_content)
 
 # Create a .reg file
-create_reg_file_for_pyinstaller("shredspace", BASE_DIR + "/update.exe")
+create_reg_file_for_pyinstaller("shredspace", BASE_DIR + "/update.exe", output_file=BASE_DIR + "/register_protocol.reg")
 
 if __name__ == "__main__":
     print("ShredSpace Updator (Text Edition) v1.0.0\n\n")
