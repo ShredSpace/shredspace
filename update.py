@@ -3,6 +3,7 @@ import zipfile
 import requests
 import json
 import shutil
+import sys
 from flask import Flask, render_template
 
 app = Flask(__name__, template_folder=os.path.join(os.getcwd(), "templates"))
@@ -122,8 +123,11 @@ def save_json(json_file):
     with open(json_file, "w") as jsf:
         json.dump(game_data, jsf)
 
-def downloadGames(json_file):
-    url = input("Enter a URL for a new game (ending in .shredspace): ")
+def downloadGames(json_file, url=None):
+    if url:
+        url = url # don't you dare criticise me for this it looks better
+    else:
+        url = input("Enter a URL for a new game (ending in .shredspace): ")
     try:
         game = requests.get(url)
         game.raise_for_status()
@@ -142,10 +146,13 @@ def downloadGames(json_file):
         print(f"Error: {e}")
 
 
-def updateGames():
+def updateGames(latest=False):
     global game_data
     # Ask the user to select the games they want to update
-    selected_games = ask_user_for_selection(game_data)
+    if latest:
+        selected_games = [game_data[len(game_data)-1]]
+    else:
+        selected_games = ask_user_for_selection(game_data)
 
     if selected_games:
         print("\nDownloading and updating selected games...\n")
@@ -173,7 +180,41 @@ def uninstallGames():
     else:
         print("\nNo games selected to uninstall.")
     save_json(json_file)
-            
+
+def create_reg_file_for_pyinstaller(protocol_name, exe_path, output_file="register_protocol.reg"):
+    """
+    Generates a .reg file for registering a custom URL protocol in Windows using a PyInstaller executable.
+
+    Args:
+    protocol_name (str): The custom protocol name (e.g., 'myapp').
+    exe_path (str): Full path to the PyInstaller-generated executable (e.g., 'C:\\path\\to\\your_app.exe').
+    output_file (str): The output .reg file name (default is 'register_protocol.reg').
+    """
+    
+    # Escape backslashes for .reg file format
+    exe_path = exe_path.replace("\\", "\\\\")
+    
+    # .reg file content
+    reg_content = f"""Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\\{protocol_name}]
+@="ShredSpace"
+"URL Protocol"=""
+
+[HKEY_CLASSES_ROOT\\{protocol_name}\\shell]
+
+[HKEY_CLASSES_ROOT\\{protocol_name}\\shell\\open]
+
+[HKEY_CLASSES_ROOT\\{protocol_name}\\shell\\open\\command]
+@="\\"{exe_path}\\" \\"%1\\""
+"""
+    
+    # Write content to the .reg file
+    with open(output_file, "w") as file:
+        file.write(reg_content)
+
+# Create a .reg file
+create_reg_file_for_pyinstaller("shredspace", BASE_DIR + "/update.exe")
 
 if __name__ == "__main__":
     print("ShredSpace Updator (Text Edition) v1.0.0\n\n")
@@ -182,31 +223,37 @@ if __name__ == "__main__":
 
     # Read the game data from the JSON file
     game_data = process_json_file(json_file)
-    running = True
-    if not game_data:
-        print("No games found.")
-    while running:
-        print("Would you like to:")
-        print("1. Download a New Game")
-        print("2. Update Existing Games")
-        print("3. Uninstall Games")
-        print("4. Quit")
-        selection = int(input("Select an option: ").strip())
-        if selection == 2:
-            updateGames()
-        elif selection == 1:
-            downloadGames(json_file)
-        elif selection == 3:
-            uninstallGames()
-        elif selection == 4:
-            running = False
-        else:
-            print("No option selected.")
+    if len(sys.argv) > 1:
+        url = sys.argv[1]
+        # Process the URL or execute actions based on the URL
+        downloadGames(json_file, url=url.replace("shredspace://", "https://"))
+        updateGames(latest=True)
+    else:
+        running = True
+        if not game_data:
+            print("No games found.")
+        while running:
+            print("Would you like to:")
+            print("1. Download a New Game")
+            print("2. Update Existing Games")
+            print("3. Uninstall Games")
+            print("4. Quit")
+            selection = int(input("Select an option: ").strip())
+            if selection == 2:
+                updateGames()
+            elif selection == 1:
+                downloadGames(json_file)
+            elif selection == 3:
+                uninstallGames()
+            elif selection == 4:
+                running = False
+            else:
+                print("No option selected.")
 
-        # Render the template and replace the static index.html
-        with app.app_context():
-            render_and_replace_static_index(game_data)
-        print("\n")
+            # Render the template and replace the static index.html
+            with app.app_context():
+                render_and_replace_static_index(game_data)
+            print("\n")
 
     print("Goodbye!")
 
