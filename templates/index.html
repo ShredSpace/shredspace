@@ -16,6 +16,7 @@
 <header>
 <h1>ShredSpace</h1>
 </header>
+{% if games | length > 0 %}
 {% for game in games %}
 <div class="gameData">
 <h3>{{ game.displayName }}</h3>
@@ -25,5 +26,8 @@
 <a class="btn btn-primary" href="{{ game.name }}/{{ game.entryPoint }}">Play Now</a>
 </div>
 {% endfor %}
+{% else %}
+<p>No games installed! Run update.exe in the resources folder to download games!</p>
+{% endif %}
 </body>
 </html>
